@@ -62,8 +62,12 @@ public class S3StreamFactoryTest {
         final S3StreamFactory subject = new S3StreamFactory(fake, cl, TimeUnit.SECONDS, 300, 30 * 1024 * 1024, 11 * 1024 * 1024, false, true, 4, 10);
 
         S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
+        try{
         stream.write("AA");
-        stream.close();
+        }finally {
+            stream.close();
+
+        }
 
         Matcher<UploadPartRequest> matcher = matchUploadPart("AA");
 
@@ -81,11 +85,15 @@ public class S3StreamFactoryTest {
         final S3StreamFactory subject = new S3StreamFactory(fake, cl, TimeUnit.SECONDS, 300, 10 * 1024 * 1024, 5 * 1024 * 1024, false, true, 4, 10);
 
         S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
+        try{
         String row = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
         for (int i = 0; i < 300000; i++) {
             stream.write(row);
         }
-        stream.close();
+        }finally {
+            stream.close();
+
+        }
 
         Matcher<UploadPartRequest> matcher = matchUploadPart('A');
 
@@ -104,7 +112,6 @@ public class S3StreamFactoryTest {
 
         S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
 
-
         try {
             String row = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
             for (int i = 0; i < 300000; i++) {
@@ -118,7 +125,8 @@ public class S3StreamFactoryTest {
 
         try {
             stream.close();
-        } catch (IllegalStateException e) {
+            fail();
+        } catch (IOException e) {
             assertTrue(true);
         }
 

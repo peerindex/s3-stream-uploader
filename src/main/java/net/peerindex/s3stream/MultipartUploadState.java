@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,9 +78,11 @@ class MultipartUploadState {
     }
 
 
-    ListenableFuture<List<PartETag>> closeAndWaitForETags() {
+    ListenableFuture<List<PartETag>> closeAndWaitForETags() throws IOException {
         synchronized (lock) {
-            checkState(!closed, "This stream is already closed");
+            if(closed){
+                throw new IOException("This stream is already closed");
+            }
             closed = true;
             return Futures.allAsList(etTags.values());
         }

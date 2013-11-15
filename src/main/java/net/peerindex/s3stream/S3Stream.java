@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -343,7 +345,7 @@ public class S3Stream implements Closeable {
     }
 
 
-    private void issueCompleteUploadRequest(MultipartUploadState old) {
+    private void issueCompleteUploadRequest(MultipartUploadState old) throws IOException {
         try {
             List<PartETag> list = old.closeAndWaitForETags().get(partUploadTimeoutNs, TimeUnit.NANOSECONDS);
             if (list.size() == 0) {
@@ -365,7 +367,8 @@ public class S3Stream implements Closeable {
         } catch (Exception e) {
             log.error("Aborting upload due to exception :" + old, e);
             issueAbortUploadRequest(old);
-            throw Throwables.propagate(e);
+            IOException r = e instanceof IOException ? (IOException)e : new IOException(e);
+            throw r;
         }
     }
 

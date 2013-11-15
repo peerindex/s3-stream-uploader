@@ -36,13 +36,13 @@ try{
 ```
 
 "permitFailures" parameter:  
-If permitFailures=true is specified, upload attempts that failed are logged and ignored. This is useful when you can't retry the upload anyways. If set to false, the stream is closed on whenever an upload failure happens and you have to open a new stream to write data again.
+If permitFailures=true is specified, upload attempts that failed are logged and ignored. This is useful when you can't retry the upload anyways. If set to false, the stream is closed whenever an upload failure happens and you have to open a new stream to write data again.
 
 Other important Notes:  
 Both factory and streams are thread-safe. However, note that there is no guarantee on the order each data is appended to the file. You typically pass a line to `write`.
 The factory is meant to be used as a singleton, as it uses a thread pool that is shared across streams created by  the same factory.
 
-Even if permitFailure=false is specified, data that was already uploaded to S3 will not be deleted upon failure. Therefore, same data may get stored more than once if you retry the upload after a failure.
+Even if permitFailure=false is specified, data that was already uploaded to S3 will not be deleted upon failure. Therefore, same data may get stored more than once if you retry the upload after a failure. You can avoid this by specifying a different prefix.
 
 
 ## License

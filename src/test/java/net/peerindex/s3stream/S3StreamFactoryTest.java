@@ -43,15 +43,15 @@ public class S3StreamFactoryTest {
 
         final S3StreamFactory subject = new S3StreamFactory(metricRegistry, client, TimeUnit.SECONDS, 300, 30 * 1024 * 1024, 11 * 1024 * 1024, false, true, 4, 10);
 
-        S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
+        S3Stream stream = subject.newStream("test", "test/", Charsets.UTF_8);
         stream.close();
 
         Matcher<InitiateMultipartUploadRequest> initReqMatcher = matchInitReq();
 
         Matcher<AbortMultipartUploadRequest> abortReqMatcher = matchAbortReq();
 
-        verify(client,times(1)).initiateMultipartUpload(argThat(initReqMatcher));
-        verify(client,times(1)).abortMultipartUpload(argThat(abortReqMatcher));
+        verify(client, times(1)).initiateMultipartUpload(argThat(initReqMatcher));
+        verify(client, times(1)).abortMultipartUpload(argThat(abortReqMatcher));
         verifyNoMoreInteractions(client);
     }
 
@@ -61,19 +61,19 @@ public class S3StreamFactoryTest {
         AmazonS3Client cl = mockClient();
         final S3StreamFactory subject = new S3StreamFactory(fake, cl, TimeUnit.SECONDS, 300, 30 * 1024 * 1024, 11 * 1024 * 1024, false, true, 4, 10);
 
-        S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
-        try{
-        stream.write("AA");
-        }finally {
+        S3Stream stream = subject.newStream("test", "test/", Charsets.UTF_8);
+        try {
+            stream.write("AA");
+        } finally {
             stream.close();
 
         }
 
         Matcher<UploadPartRequest> matcher = matchUploadPart("AA");
 
-        verify(cl,times(1)).initiateMultipartUpload(argThat(matchInitReq()));
-        verify(cl,times(1)).uploadPart(argThat(matcher));
-        verify(cl,times(1)).completeMultipartUpload(argThat(matchCompleteReq("test", "test/")));
+        verify(cl, times(1)).initiateMultipartUpload(argThat(matchInitReq()));
+        verify(cl, times(1)).uploadPart(argThat(matcher));
+        verify(cl, times(1)).completeMultipartUpload(argThat(matchCompleteReq("test", "test/")));
         verifyNoMoreInteractions(cl);
     }
 
@@ -84,22 +84,22 @@ public class S3StreamFactoryTest {
         AmazonS3Client cl = mockClient();
         final S3StreamFactory subject = new S3StreamFactory(fake, cl, TimeUnit.SECONDS, 300, 10 * 1024 * 1024, 5 * 1024 * 1024, false, true, 4, 10);
 
-        S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
-        try{
-        String row = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-        for (int i = 0; i < 300000; i++) {
-            stream.write(row);
-        }
-        }finally {
+        S3Stream stream = subject.newStream("test", "test/", Charsets.UTF_8);
+        try {
+            String row = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+            for (int i = 0; i < 300000; i++) {
+                stream.write(row);
+            }
+        } finally {
             stream.close();
 
         }
 
         Matcher<UploadPartRequest> matcher = matchUploadPart('A');
 
-        verify(cl,times(2)).initiateMultipartUpload(argThat(matchInitReq()));
-        verify(cl,times(3)).uploadPart(argThat(matcher));
-        verify(cl,times(2)).completeMultipartUpload(argThat(matchCompleteReq("test", "test/")));
+        verify(cl, times(2)).initiateMultipartUpload(argThat(matchInitReq()));
+        verify(cl, times(3)).uploadPart(argThat(matcher));
+        verify(cl, times(2)).completeMultipartUpload(argThat(matchCompleteReq("test", "test/")));
         verifyNoMoreInteractions(cl);
     }
 
@@ -110,7 +110,7 @@ public class S3StreamFactoryTest {
         AmazonS3Client cl = mockFailingClient();
         final S3StreamFactory subject = new S3StreamFactory(fake, cl, TimeUnit.SECONDS, 300, 10 * 1024 * 1024, 5 * 1024 * 1024, false, true, 4, 10);
 
-        S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
+        S3Stream stream = subject.newStream("test", "test/", Charsets.UTF_8);
 
         try {
             String row = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -132,9 +132,9 @@ public class S3StreamFactoryTest {
 
         Matcher<UploadPartRequest> matcher = matchUploadPart('A');
 
-        verify(cl,times(2)).initiateMultipartUpload(argThat(matchInitReq()));
-        verify(cl,times(1)).uploadPart(argThat(matcher));
-        verify(cl,times(2)).abortMultipartUpload(argThat(matchAbortReq()));
+        verify(cl, times(2)).initiateMultipartUpload(argThat(matchInitReq()));
+        verify(cl, times(1)).uploadPart(argThat(matcher));
+        verify(cl, times(2)).abortMultipartUpload(argThat(matchAbortReq()));
         verifyNoMoreInteractions(cl);
     }
 
@@ -145,22 +145,25 @@ public class S3StreamFactoryTest {
         AmazonS3Client cl = mockFailingClient();
         final S3StreamFactory subject = new S3StreamFactory(fake, cl, TimeUnit.SECONDS, 300, 10 * 1024 * 1024, 5 * 1024 * 1024, true, true, 4, 10);
 
-        S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
+        S3Stream stream = subject.newStream("test", "test/", Charsets.UTF_8);
+        try {
+            String row = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+            for (int i = 0; i < 300000; i++) {
+                stream.write(row);
+            }
 
-        String row = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-        for (int i = 0; i < 300000; i++) {
-            stream.write(row);
+        } finally {
+            stream.close();
+
         }
 
 
-        stream.close();
-
         Matcher<UploadPartRequest> matcher = matchUploadPart('A');
 
-        verify(cl,times(2)).initiateMultipartUpload(argThat(matchInitReq()));
-        verify(cl,times(2)).uploadPart(argThat(matcher));
-        verify(cl,times(2)).abortMultipartUpload(argThat(matchAbortReq()));
-        verify(cl,times(1)).completeMultipartUpload(argThat(matchCompleteReq("test", "test/")));
+        verify(cl, times(2)).initiateMultipartUpload(argThat(matchInitReq()));
+        verify(cl, times(2)).uploadPart(argThat(matcher));
+        verify(cl, times(2)).abortMultipartUpload(argThat(matchAbortReq()));
+        verify(cl, times(1)).completeMultipartUpload(argThat(matchCompleteReq("test", "test/")));
         verifyNoMoreInteractions(cl);
     }
 
@@ -170,7 +173,7 @@ public class S3StreamFactoryTest {
         AmazonS3Client cl = mockFailingClient();
         final S3StreamFactory subject = new S3StreamFactory(fake, cl, TimeUnit.SECONDS, 300, 10 * 1024 * 1024, 5 * 1024 * 1024, true, true, 4, 10);
 
-        S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
+        S3Stream stream = subject.newStream("test", "test/", Charsets.UTF_8);
         stream.close();
         stream.write("AA");
     }
@@ -181,12 +184,11 @@ public class S3StreamFactoryTest {
         AmazonS3Client cl = mockFailingClient();
         final S3StreamFactory subject = new S3StreamFactory(fake, cl, TimeUnit.SECONDS, 300, 10 * 1024 * 1024, 5 * 1024 * 1024, true, true, 4, 10);
 
-        S3Stream stream = subject.newStream("test","test/", Charsets.UTF_8);
+        S3Stream stream = subject.newStream("test", "test/", Charsets.UTF_8);
         stream.write("AA");
         stream.close();
         stream.write("AA");
     }
-
 
 
     private CustomTypeSafeMatcher<AbortMultipartUploadRequest> matchAbortReq() {
@@ -234,7 +236,7 @@ public class S3StreamFactoryTest {
             protected boolean matchesSafely(UploadPartRequest subject) {
                 try {
                     String read = CharStreams.toString(new InputStreamReader(subject.getInputStream(), Charsets.UTF_8));
-                    for(int i = 0, n = read.length() ; i < n ; i++) {
+                    for (int i = 0, n = read.length(); i < n; i++) {
                         checkState(read.charAt(i) == c);
                     }
                     return true;
@@ -257,8 +259,8 @@ public class S3StreamFactoryTest {
     }
 
     private AmazonS3Client mockFailingClient() {
-        AmazonS3Client client = mock(AmazonS3Client.class,RETURNS_DEEP_STUBS);
-        InitiateMultipartUploadResult retOnInit = mock(InitiateMultipartUploadResult.class,RETURNS_DEEP_STUBS);
+        AmazonS3Client client = mock(AmazonS3Client.class, RETURNS_DEEP_STUBS);
+        InitiateMultipartUploadResult retOnInit = mock(InitiateMultipartUploadResult.class, RETURNS_DEEP_STUBS);
         when(retOnInit.getUploadId()).thenReturn(MOCK_UPLOAD_ID);
         when(client.initiateMultipartUpload(any(InitiateMultipartUploadRequest.class))).thenReturn(retOnInit);
         UploadPartResult uploadPartResult = mock(UploadPartResult.class);
@@ -267,14 +269,12 @@ public class S3StreamFactoryTest {
     }
 
     private AmazonS3Client mockClient() {
-        AmazonS3Client client = mock(AmazonS3Client.class,RETURNS_DEEP_STUBS);
-        InitiateMultipartUploadResult retOnInit = mock(InitiateMultipartUploadResult.class,RETURNS_DEEP_STUBS);
+        AmazonS3Client client = mock(AmazonS3Client.class, RETURNS_DEEP_STUBS);
+        InitiateMultipartUploadResult retOnInit = mock(InitiateMultipartUploadResult.class, RETURNS_DEEP_STUBS);
         when(retOnInit.getUploadId()).thenReturn(MOCK_UPLOAD_ID);
         when(client.initiateMultipartUpload(any(InitiateMultipartUploadRequest.class))).thenReturn(retOnInit);
         return client;
     }
-
-
 
 
 }

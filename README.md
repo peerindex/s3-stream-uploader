@@ -18,8 +18,10 @@ long uploadTimeoutSec = 300;
 int fileSizeBytes = 1024 * 1024 * 1024;
 
 // The last boolean configures whether to "permit failures"
-// If permitFailures is true, upload attempts that failed are logged and ignored (useful when you can't afford to go back and retry)
+// If permitFailures is true, upload attempts that failed are logged and ignored 
+// (useful when you can't retry anyways)
 // If set to false, the stream is closed on upload failures and you have to open a new stream
+// before you can write again
 S3StreamFactory factory = new S3StreamFactory(cl, TimeUnit.SECONDS, 300, fileSizeBytes, false);
 
 String bucketName = "testbucket";
@@ -39,9 +41,13 @@ try{
 // Notes:
 // Both factory and streams are thread-safe. However, note that there is no guarantee on the order each data is
 // appended to the file.
-// Factory is meant to be used as a singleton, as it uses a thread pool that is shared across streams created by the same
-// factory.
-
+// 
+// Factory is meant to be used as a singleton, as it uses a thread pool that is shared across streams created by 
+// the same factory.
+//
+// Even if permitFailure=false is specified, data that was already uploaded to S3 will not be deleted upon failure.
+// Therefore, same data may get stored more than once if you retry the upload after a failure.
+// 
 ```
 
 

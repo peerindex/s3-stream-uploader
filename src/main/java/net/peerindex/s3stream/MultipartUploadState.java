@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.google.common.base.Preconditions.checkState;
-
 
 /**
  * @author Enno Shioji (enno.shioji@peerindex.com)

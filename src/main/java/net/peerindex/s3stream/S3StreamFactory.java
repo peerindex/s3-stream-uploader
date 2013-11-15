@@ -16,7 +16,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 
 /**
- * Utility class that can be used to stream data into S3
+ * Factory for creating {@link net.peerindex.s3stream.S3Stream} instances. This class is meant to be instantiated once,
+ * and be shared across the application. This class is thread-safe.
  * @author Enno Shioji (enno.shioji@peerindex.com)
  */
 public class S3StreamFactory {
@@ -35,7 +36,19 @@ public class S3StreamFactory {
     private final ListeningExecutorService workers;
 
     /**
-     * Create a new {@link net.peerindex.s3stream.S3Stream} instance.
+     *
+     * @param s3Client A properly configured {@link com.amazonaws.services.s3.AmazonS3Client}
+     * @param timeUnit {@link java.util.concurrent.TimeUnit} for partUploadTimeoutDuration
+     * @param partUploadTimeoutDuration The timeout duration for part uploads.
+     * @param fileSizeBytes The size of files that should be created in S3. Minimum 5MB
+     * @param partUploadSizeBytes The size of part uploads. Minimum 5MB
+     * @param permitFailures Whether to permit failures while uploading.
+     */
+    public S3StreamFactory(AmazonS3Client s3Client, TimeUnit timeUnit, long partUploadTimeoutDuration, int fileSizeBytes, int partUploadSizeBytes, boolean permitFailures) {
+        this(new MetricRegistry(), s3Client, timeUnit, partUploadTimeoutDuration, fileSizeBytes, partUploadSizeBytes, permitFailures, true, availableCores, availableCores * 2);
+    }
+
+    /**
      *
      * @param metricRegistry A {@link com.codahale.metrics.MetricRegistry} to output metrics to.
      * @param s3Client A properly configured {@link com.amazonaws.services.s3.AmazonS3Client}
@@ -50,7 +63,6 @@ public class S3StreamFactory {
     }
 
     /**
-     * Create a new {@link net.peerindex.s3stream.S3Stream} instance.
      *
      * @param metricRegistry A {@link com.codahale.metrics.MetricRegistry} to output metrics to.
      * @param s3Client A properly configured {@link com.amazonaws.services.s3.AmazonS3Client}

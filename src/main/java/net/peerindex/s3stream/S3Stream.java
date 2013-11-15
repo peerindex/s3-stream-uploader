@@ -28,7 +28,8 @@ import static com.google.common.base.Preconditions.checkState;
 
 
 /**
- * Utility class that can be used to stream data into Amazon S3. See {@link net.peerindex.s3stream.S3StreamFactory} for more details
+ * Utility class that can be used to stream data into Amazon S3.
+ * This class is thread-safe.
  * @author Enno Shioji (enno.shioji@peerindex.com)
  */
 public class S3Stream implements Closeable {
@@ -90,9 +91,11 @@ public class S3Stream implements Closeable {
 
 
     /**
-     * Add new content to the buffer for upload. This method does not block and returns immediately, except when the buffer and
-     * the upload queue is both full, in which case the calling thread will block until the current buffer's upload
-     * finishes.
+     * Add new content to the buffer for upload. This method does not block and returns immediately, except when the
+     * buffer and the upload queue is both full, in which case the calling thread will block until the current buffer's
+     * upload finishes. This method can be called safely from multiple methods. However, note that there is no
+     * guarantee on the order the content is appended to the file.
+     *
      *
      * @param content
      * @throws java.io.IOException
@@ -121,6 +124,10 @@ public class S3Stream implements Closeable {
     }
 
 
+    /**
+     * This method must be called after all content has been added to the stream.
+     * @throws IOException
+     */
     @Override
     public void close() throws IOException {
         Timer.Context t = metricRegistry.timer(this.getClass().getSimpleName() + "_close").time();

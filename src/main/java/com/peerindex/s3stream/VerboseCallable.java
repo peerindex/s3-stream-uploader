@@ -1,4 +1,4 @@
-package net.peerindex.s3stream;
+package com.peerindex.s3stream;
 
 import com.google.common.base.Throwables;
 import org.slf4j.Logger;

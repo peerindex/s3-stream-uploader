@@ -1,4 +1,4 @@
-package net.peerindex.s3stream;
+package com.peerindex.s3stream;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.codahale.metrics.MetricRegistry;
@@ -16,7 +16,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 
 /**
- * Factory for creating {@link net.peerindex.s3stream.S3Stream} instances. This class is meant to be instantiated once,
+ * Factory for creating {@link com.peerindex.s3stream.S3Stream} instances. This class is meant to be instantiated once,
  * and be shared across the application. This class is thread-safe.
  * @author Enno Shioji (enno.shioji@peerindex.com)
  */

@@ -1,4 +1,4 @@
-package net.peerindex.s3stream;
+package com.peerindex.s3stream;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3Client;

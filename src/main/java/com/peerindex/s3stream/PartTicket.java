@@ -1,4 +1,4 @@
-package net.peerindex.s3stream;
+package com.peerindex.s3stream;
 
 
 /**

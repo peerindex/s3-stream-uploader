@@ -41,6 +41,18 @@ public class S3StreamFactory {
      * @param timeUnit {@link java.util.concurrent.TimeUnit} for partUploadTimeoutDuration
      * @param partUploadTimeoutDuration The timeout duration for part uploads.
      * @param fileSizeBytes The size of files that should be created in S3. Minimum 5MB
+     * @param permitFailures Whether to permit failures while uploading.
+     */
+    public S3StreamFactory(AmazonS3Client s3Client, TimeUnit timeUnit, long partUploadTimeoutDuration, int fileSizeBytes, boolean permitFailures) {
+        this(new MetricRegistry(), s3Client, timeUnit, partUploadTimeoutDuration, fileSizeBytes, 10 * 1024 * 1024, permitFailures, true, availableCores, availableCores * 2);
+    }
+
+    /**
+     *
+     * @param s3Client A properly configured {@link com.amazonaws.services.s3.AmazonS3Client}
+     * @param timeUnit {@link java.util.concurrent.TimeUnit} for partUploadTimeoutDuration
+     * @param partUploadTimeoutDuration The timeout duration for part uploads.
+     * @param fileSizeBytes The size of files that should be created in S3. Minimum 5MB
      * @param partUploadSizeBytes The size of part uploads. Minimum 5MB
      * @param permitFailures Whether to permit failures while uploading.
      */

@@ -42,7 +42,7 @@ Other important Notes:
 Both factory and streams are thread-safe. However, note that there is no guarantee on the order each data is appended to the file. You typically pass a line to `write`.
 The factory is meant to be used as a singleton, as it uses a thread pool that is shared across streams created by  the same factory.
 
-Even if permitFailure=false is specified, data that was already uploaded to S3 will not be deleted upon failure. Therefore, same data may get stored more than once if you retry the upload after a failure. You can avoid this by specifying a different prefix.
+Even if permitFailure=false is specified, data that was already uploaded to S3 will not be deleted upon failure. Therefore, same data may get stored more than once if you retry the upload after a failure. I usually generate a unique prefix, and throw it away when a failure happens to solve this.
 
 
 ## License
